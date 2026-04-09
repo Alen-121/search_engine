@@ -90,26 +90,16 @@ def chunk_text(text, chunk_size=CHUNK_SIZE, overlap=CHUNK_OVERLAP):
 
 ''' Tokenization '''
 
-# Common English stop words — these inflate BM25 scores for irrelevant queries
-# because they appear in nearly every document.
-STOP_WORDS = {
-    "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for",
-    "of", "with", "by", "from", "is", "are", "was", "were", "be", "been",
-    "being", "have", "has", "had", "do", "does", "did", "will", "would",
-    "could", "should", "may", "might", "shall", "can", "need", "must",
-    "it", "its", "this", "that", "these", "those", "he", "she", "we",
-    "they", "you", "me", "him", "her", "us", "them", "my", "your", "his",
-    "our", "their", "who", "whom", "whose", "which", "what", "where",
-    "when", "how", "why", "if", "then", "so", "no", "not", "only", "very",
-    "just", "about", "also", "more", "some", "any", "each", "every", "all",
-    "both", "few", "most", "other", "such", "into", "over", "after",
-    "before", "between", "under", "again", "further", "once", "here",
-    "there", "than", "too", "as", "up", "out", "off", "down", "own",
-}
+import nltk
+from nltk.corpus import stopwords
+
+# Download stopwords if not already present
+nltk.download('stopwords', quiet=True)
+STOP_WORDS = set(stopwords.words('english'))
 
 
 def tokenize(text):
-    """Tokenizer for BM25 with stop word removal."""
+    """Tokenizer for BM25 with NLTK stop word removal."""
     text = text.lower()
     text = re.sub(r'[^a-z0-9\s]', ' ', text)
     tokens = text.split()
