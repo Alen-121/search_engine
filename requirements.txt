@@ -1,0 +1,8 @@
+requests
+beautifulsoup4
+sentence-transformers
+faiss-cpu
+rank-bm25
+streamlit
+lxml
+matplotlib
