@@ -10,7 +10,7 @@ from search import SearchEngine
 # ─── Page Config ─────────────────────────────────────────────────────────────
 
 st.set_page_config(
-    page_title="AA Docs Search Engine",
+    page_title="Docs Search Engine",
     page_icon="🔍",
     layout="wide",
 )
@@ -188,32 +188,12 @@ with st.sidebar:
 
     top_k = st.slider("Results to Show", 3, 10, 5)
 
-    st.markdown("---")
-    st.markdown("### 📊 Index Stats")
+
     stats = engine.get_stats()
 
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown(f"""
-        <div class="stats-box">
-            <div class="stats-number">{stats['total_blogs']}</div>
-            <div class="stats-label">Blogs</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with col2:
-        st.markdown(f"""
-        <div class="stats-box">
-            <div class="stats-number">{stats['total_chunks']}</div>
-            <div class="stats-label">Chunks</div>
-        </div>
-        """, unsafe_allow_html=True)
 
-    st.markdown(f"""
-    <div style="margin-top: 1rem; color: #666; font-size: 0.8rem;">
-        <strong>Model:</strong> {stats['embedding_model']}<br>
-        <strong>Vectors:</strong> {stats['faiss_vectors']}
-    </div>
-    """, unsafe_allow_html=True)
+
+
 
     st.markdown("---")
     st.markdown("""
@@ -230,7 +210,7 @@ with st.sidebar:
 
 st.markdown("""
 <div class="main-header">
-    <h1>🔍 AA Docs Search Engine</h1>
+    <h1>🔍 Docs Search Engine</h1>
     <p>Search Automation Anywhere blogs using Keyword, Semantic, or Hybrid search</p>
 </div>
 """, unsafe_allow_html=True)
@@ -319,7 +299,6 @@ else:
         "automation in fintech",
         "IT service management",
         "AI knowledge management",
-        "on-premise enterprise automation",
     ]
 
     cols = st.columns(len(examples))
