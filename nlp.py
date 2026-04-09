@@ -12,6 +12,11 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 import faiss
 from rank_bm25 import BM25Okapi
+import nltk
+from nltk.corpus import stopwords
+
+# Download stopwords if not already present
+nltk.download('stopwords', quiet=True)
 
 ''' Configuration '''
 
@@ -20,8 +25,9 @@ CHUNKS_FILE = os.path.join(DATA_DIR, "chunks.json")
 BM25_FILE = os.path.join(DATA_DIR, "bm25_index.pkl")
 FAISS_FILE = os.path.join(DATA_DIR, "faiss_index.bin")
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"
-CHUNK_SIZE = 500  # characters
+CHUNK_SIZE = 800  # characters
 CHUNK_OVERLAP = 100
+MAX_PARA = 3
 
 
 ''' Chunking '''
@@ -55,7 +61,7 @@ def chunk_text(text, chunk_size=CHUNK_SIZE, overlap=CHUNK_OVERLAP):
     return chunks
 '''
 
-def chunk_text(text, chunk_size=CHUNK_SIZE, overlap=CHUNK_OVERLAP):
+def chunk_text(text, chunk_size=CHUNK_SIZE, overlap=MAX_PARA):
     """
     Paragraph-based chunking.
     Groups 2-3 paragraphs per chunk, respecting natural boundaries.
@@ -67,16 +73,14 @@ def chunk_text(text, chunk_size=CHUNK_SIZE, overlap=CHUNK_OVERLAP):
     chunks = []
     current_chunk = []
     current_len = 0
-    max_paras = 3
-    max_chars = 800
 
     for para in paragraphs:
         # If adding this paragraph exceeds limits, save current chunk
-        if current_chunk and (len(current_chunk) >= max_paras or current_len + len(para) > max_chars):
+        if current_chunk and (len(current_chunk) >= overlap or current_len + len(para) > chunk_size):
             chunks.append('\n'.join(current_chunk))
             # Keep last paragraph as overlap (paragraph-level overlap)
-            current_chunk = [current_chunk[-1]]
-            current_len = len(current_chunk[0])
+            current_chunk = current_chunk[-overlap:]
+            current_len = sum(len(p) for p in current_chunk)
 
         current_chunk.append(para)
         current_len += len(para)
@@ -90,11 +94,7 @@ def chunk_text(text, chunk_size=CHUNK_SIZE, overlap=CHUNK_OVERLAP):
 
 ''' Tokenization '''
 
-import nltk
-from nltk.corpus import stopwords
 
-# Download stopwords if not already present
-nltk.download('stopwords', quiet=True)
 STOP_WORDS = set(stopwords.words('english'))
 
 
