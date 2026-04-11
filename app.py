@@ -286,7 +286,7 @@ if query:
                     {i+1}. <a href="{r['url']}" target="_blank">{r['title']}</a>
                 </div>
                 <div class="result-meta">
-                    <span class="badge badge-score">Score: {r['score']:.3f} | Reranked Score: {r['reranked_score']:.3f}{extra_scores}</span>
+                    <span class="badge badge-score">Score: {r['score']:.3f} | Reranked Score: {r.get('reranked_score',0.0):.3f}{extra_scores}</span>
                     <span class="badge badge-category">{category_display}</span>
                     <span class="badge badge-method">{r.get('method', search_mode)}</span>
                 </div>

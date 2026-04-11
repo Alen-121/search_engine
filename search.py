@@ -48,6 +48,9 @@ class SearchEngine:
 
         print(f" Loaded {len(self.chunks)} chunks, "
               f"FAISS index ({self.faiss_index.ntotal} vectors)")
+
+        # Initialize cross encoder model
+        self.cross_encoder = CrossEncoder(CROSS_ENCODER_MODEL)
     def load_model(self):
         """ function for using the embedding model as lazy loading"""
         if self.model is None:
@@ -168,9 +171,9 @@ class SearchEngine:
         This function deals with reranking the retrieved results using a cross encoder model
         by taking the sorted results
         """
-        model = CrossEncoder(CROSS_ENCODER_MODEL)
+        # model = CrossEncoder(CROSS_ENCODER_MODEL)
         pairs = [(query,results[i]["text"]) for i in range(len(results))]
-        scores = model.predict(pairs)
+        scores = self.cross_encoder.predict(pairs)
         for i in range(len(results)):
             results[i]['reranked_score'] = scores[i]
         ranked_results = sorted(results ,key=lambda x:x['reranked_score'],reverse=True)
