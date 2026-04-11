@@ -17,9 +17,8 @@ from nlp import CHUNKS_FILE, BM25_FILE, FAISS_FILE, EMBEDDING_MODEL, tokenize
 
 # Minimum cosine similarity threshold — results below this are considered
 # irrelevant (i.e., the query is out of the scope of the indexed content).
-# Typical cosine similarity values from all-MiniLM-L6-v2:
-#   0.7+ = very similar, 0.4-0.7 = somewhat related, <0.25 = likely unrelated
-MIN_RELEVANCE_THRESHOLD = 0.25
+
+MIN_RELEVANCE_THRESHOLD = 0.0
 
 
 class SearchEngine:
@@ -42,9 +41,16 @@ class SearchEngine:
         # Load embedding model
         self.model = SentenceTransformer(EMBEDDING_MODEL)
 
+        # Initialize model attribute for lazy loading
+        # self.model = None
+
         print(f" Loaded {len(self.chunks)} chunks, "
               f"FAISS index ({self.faiss_index.ntotal} vectors)")
-
+    def load_model(self):
+        """ function for using the embedding model as lazy loading"""
+        if self.model is None:
+            self.model = SentenceTransformer(EMBEDDING_MODEL)
+        return self.model
     def keyword_search(self, query, top_k=10):
         """BM25 keyword search."""
         tokens = tokenize(query)
@@ -67,8 +73,9 @@ class SearchEngine:
 
         return results
 
-    def semantic_search(self, query, top_k=10):
+    def semantic_search(self, query, top_k=5):
         """FAISS semantic search using embeddings."""
+        # model = self.load_model()
         query_embedding = self.model.encode(
             [query], normalize_embeddings=True
         ).astype("float32")
@@ -86,7 +93,7 @@ class SearchEngine:
 
         return results
 
-    def hybrid_search(self, query, top_k=5, alpha=0.5):
+    def hybrid_search(self, query, top_k=10, alpha=0.5):
         """
         Hybrid search combining keyword and semantic results.
 
@@ -97,8 +104,11 @@ class SearchEngine:
                    alpha=1.0 → pure semantic, alpha=0.0 → pure keyword
         """
         # Get more results from each method for better merging
+
         keyword_results = self.keyword_search(query, top_k=top_k * 3)
+        # print(len(keyword_results))
         semantic_results = self.semantic_search(query, top_k=top_k * 3)
+        # print(semantic_results)
 
         # Save raw semantic scores before normalization (for threshold check)
         raw_semantic_scores = {r["chunk_id"]: r["score"] for r in semantic_results}

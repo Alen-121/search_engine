@@ -6,7 +6,8 @@ Streamlit UI for the Documentation Search Engine.
 import streamlit as st
 import time
 from search import SearchEngine
-
+import psutil
+import os
 # ─── Page Config ─────────────────────────────────────────────────────────────
 
 st.set_page_config(
@@ -150,7 +151,11 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-
+# ___ memory usage ____
+def show_memory():
+    process = psutil.Process(os.getpid())
+    mem = process.memory_info().rss /(1024 **2)
+    return mem
 # ─── Load Search Engine (cached) ────────────────────────────────────────────
 
 @st.cache_resource
@@ -158,6 +163,8 @@ def load_engine():
     return SearchEngine()
 
 
+
+st.write('Memory usage', show_memory(), 'MB')
 try:
     engine = load_engine()
 except FileNotFoundError:
@@ -187,9 +194,9 @@ with st.sidebar:
         alpha = 0.5
 
     top_k = st.slider("Results to Show", 3, 10, 5)
+    # top_k =5
 
-
-    stats = engine.get_stats()
+    # stats = engine.get_stats()
 
 
 
