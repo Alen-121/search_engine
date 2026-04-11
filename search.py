@@ -12,6 +12,7 @@ import pickle
 import numpy as np
 import faiss
 from sentence_transformers import SentenceTransformer
+from sentence_transformers import CrossEncoder
 from nlp import CHUNKS_FILE, BM25_FILE, FAISS_FILE, EMBEDDING_MODEL, tokenize
 
 
@@ -19,6 +20,7 @@ from nlp import CHUNKS_FILE, BM25_FILE, FAISS_FILE, EMBEDDING_MODEL, tokenize
 # irrelevant (i.e., the query is out of the scope of the indexed content).
 
 MIN_RELEVANCE_THRESHOLD = 0.0
+CROSS_ENCODER_MODEL = 'cross-encoder/ms-marco-MiniLM-L-6-v2'
 
 
 class SearchEngine:
@@ -160,6 +162,19 @@ class SearchEngine:
                 break
 
         return deduplicated
+    
+    def reranking_results(self,query,results):
+        """
+        This function deals with reranking the retrieved results using a cross encoder model
+        by taking the sorted results
+        """
+        model = CrossEncoder(CROSS_ENCODER_MODEL)
+        pairs = [(query,results[i]["text"]) for i in range(len(results))]
+        scores = model.predict(pairs)
+        for i in range(len(results)):
+            results[i]['reranked_score'] = scores[i]
+        ranked_results = sorted(results ,key=lambda x:x['reranked_score'],reverse=True)
+        return ranked_results
 
     @staticmethod
     def _normalize_scores(results):

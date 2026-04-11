@@ -255,6 +255,7 @@ if query:
         results = deduped[:top_k]
     else:
         results = engine.hybrid_search(query, top_k=top_k, alpha=alpha)
+        results = engine.reranking_results(query,results)
 
     elapsed = time.time() - start_time
 
@@ -285,7 +286,7 @@ if query:
                     {i+1}. <a href="{r['url']}" target="_blank">{r['title']}</a>
                 </div>
                 <div class="result-meta">
-                    <span class="badge badge-score">Score: {r['score']:.3f}{extra_scores}</span>
+                    <span class="badge badge-score">Score: {r['score']:.3f} | Reranked Score: {r['reranked_score']:.3f}{extra_scores}</span>
                     <span class="badge badge-category">{category_display}</span>
                     <span class="badge badge-method">{r.get('method', search_mode)}</span>
                 </div>
